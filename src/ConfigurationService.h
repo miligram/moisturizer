@@ -13,10 +13,11 @@ class ConfigurationService {
 
     public:        
         ConfigurationService(String);
-        void load();
-        void save();
+        bool load();
+        bool save();
         bool exists();
-        void printConfiguration();
+        void printConfiguration(Stream *stream);
+        void printConfigurationFile(Stream *stream);
         Configuration* getConfiguration();
 };
 
