@@ -14,10 +14,14 @@
 #include "Relay.h"
 #include "ConfigurationService.h"
 #include <FS.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 MoistureSensor* moistureSensor;
 Relay* relay;
 HTTPClient http;
+AsyncWebServer server(80);
+
 
 void setupWifi(char* ssid, char* password) {
   WiFi.begin(ssid, password);
@@ -78,6 +82,23 @@ void setup() {
   Serial.println(F("setupWifi();"));
   setupWifi(config->ssid, config->password);
   
+  server.on("/configuration", HTTP_POST, 
+    [](AsyncWebServerRequest *request) {
+      request->send(200, "application/json", String(F("Hello world!")));
+    },
+    [](AsyncWebServerRequest *onUpload, String filename, size_t index, uint8_t *data, size_t len, bool final) {},
+    [](AsyncWebServerRequest *onBody, uint8_t *data, size_t len, size_t index, size_t total) {
+      Serial.printf("Body len: %d\n", len);
+      Serial.printf("Body index: %d\n", index);
+      Serial.printf("Body total: %d\n", total);
+      Serial.printf("Body data: %s", data);      
+    }
+  );
+  
+  server.serveStatic("/configuration", SPIFFS, "/").setDefaultFile("config.json");
+
+  server.begin();
+
   //Serial.println("MoistureSensor");
   //moistureSensor = new MoistureSensor(0, 1024, D0, A0, 1024);
 
