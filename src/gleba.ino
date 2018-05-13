@@ -39,9 +39,6 @@ void setup() {
   
   //SPIFFS.format();
 
-  
-  
-  
   printFsInfo();
 
   ConfigurationService configurationService("/config.json");
@@ -56,17 +53,8 @@ void setup() {
     Serial.println(F("load configuration"));
     configurationService.load();    
 
-    configurationService.printConfiguration();
-
-    Serial.printf("ssid: %s\n", config->ssid);
-    Serial.printf("password: %s\n", config->password);
-    Serial.printf("relayPin: %d\n", config->relayPin);
-    Serial.printf("moistureSensors[0]::min: %d\n", config->moistureSensors[0].min);
-    Serial.printf("moistureSensors[0]::max: %d\n", config->moistureSensors[0].max);
-    Serial.printf("moistureSensors[0]::sensorPowerPin: %d\n", config->moistureSensors[0].sensorPowerPin);
-    Serial.printf("moistureSensors[0]::sensorReadPin: %d\n", config->moistureSensors[0].sensorReadPin);
-    Serial.printf("moistureSensors[0]::threshold: %d\n", config->moistureSensors[0].threshold);
-
+    configurationService.printConfigurationFile(&Serial);
+    configurationService.printConfiguration(&Serial);
   } else {
     Serial.println(F("save configuration"));
 
@@ -75,18 +63,20 @@ void setup() {
     
     config->relayPin = D2;
     
-    config->moistureSensors[0].min = 0;
-    config->moistureSensors[0].max = 1024;
-    config->moistureSensors[0].sensorPowerPin = D0;
-    config->moistureSensors[0].sensorReadPin = A0;
-    config->moistureSensors[0].threshold = 1024;
+    config->moistureSensorsCount = 1;
+    config->moistureSensors = new MoistureSensorConfig[config->moistureSensorsCount];
+    config->moistureSensors[0] = MoistureSensorConfig(0, 1024, D0, A0, 1024);
     
     configurationService.save();
+    Serial.println(F("save configuration"));
+    configurationService.printConfigurationFile(&Serial);
+    configurationService.printConfiguration(&Serial);
+
     printFsInfo();
   }
 
-  //Serial.println("setupWifi();");
-  //setupWifi(config->ssid, config->password);
+  Serial.println(F("setupWifi();"));
+  setupWifi(config->ssid, config->password);
   
   //Serial.println("MoistureSensor");
   //moistureSensor = new MoistureSensor(0, 1024, D0, A0, 1024);
@@ -124,6 +114,6 @@ void loop() {
     //relay->off();
   // }
 
-  delay(2000);
+  delay(5000);
 }
 
